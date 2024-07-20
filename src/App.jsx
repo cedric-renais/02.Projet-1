@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { useState } from 'react';
+import { useEffect, useState } from 'react'; // Importez useEffect
 import ListItem from './components/ListItem';
 
 function App() {
@@ -8,8 +8,19 @@ function App() {
   const [todo, setTodo] = useState('');
   const [showValidation, setShowValidation] = useState(false);
 
+  // Charger les tâches depuis le localStorage au démarrage
+  useEffect(() => {
+    const storedTodos = localStorage.getItem('todoList');
+    if (storedTodos) {
+      setTodoList(JSON.parse(storedTodos));
+    }
+  }, []);
+
   function deleteTodo(id) {
-    setTodoList(todoList.filter((todo) => todo.id !== id));
+    const updatedTodoList = todoList.filter((todo) => todo.id !== id);
+    setTodoList(updatedTodoList);
+    // Mettre à jour le localStorage après suppression
+    localStorage.setItem('todoList', JSON.stringify(updatedTodoList));
   }
 
   function handleSubmit(e) {
@@ -18,11 +29,13 @@ function App() {
       setShowValidation(true);
       return;
     }
-    if (todo.trim() !== '') {
-      setTodoList([...todoList, { id: nanoid(8), content: todo }]);
-      setTodo('');
-      setShowValidation(false);
-    }
+    const newTodo = { id: nanoid(8), content: todo };
+    const updatedTodoList = [...todoList, newTodo];
+    setTodoList(updatedTodoList);
+    // Sauvegarder dans le localStorage
+    localStorage.setItem('todoList', JSON.stringify(updatedTodoList));
+    setTodo('');
+    setShowValidation(false);
   }
 
   return (
